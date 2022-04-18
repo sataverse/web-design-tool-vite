@@ -2007,8 +2007,8 @@
                             componentFileContents[i] += '\t\twidth: '+Math.ceil(obj.object.width)+'px;\n';
                         }
                         componentFileContents[i] += '\t\theight: '+Math.ceil(obj.object.height)+'px;\n';
-                        componentFileContents[i] += '\t\tleft: '+Math.ceil(obj.object.left)+'px;\n';
-                        componentFileContents[i] += '\t\ttop: '+Math.ceil(obj.object.top)+'px;\n';
+                        componentFileContents[i] += '\t\tleft: '+Math.ceil(comp.defaultObject.box.width/2 + obj.object.left)+'px;\n';
+                        componentFileContents[i] += '\t\ttop: '+Math.ceil(comp.defaultObject.box.height/2 - 20 + obj.object.top)+'px;\n';
 
                         //배경색
                         if(obj.tagType == 'rect'){
@@ -2048,7 +2048,7 @@
                 pageFileContents[i] += '<'+'script>\n';
                 page.selectComponent.forEach(sel => {
                     if(sel.componentId != '//deleted//'){
-                        pageFileContents[i] += "\timport "+sel.componentId+" from './component/"+sel.componentId+"'\n";
+                        pageFileContents[i] += "\timport "+sel.componentId+" from './component/"+sel.componentId+".svelte'\n";
                     }
                 });
                 pageFileContents[i] += '</'+'script>\n';
@@ -2067,7 +2067,7 @@
                 page.selectComponent.forEach(sel => {
                     if(sel.componentId != '//deleted//'){
                         pageFileContents[i] += "\t#" + sel.componentId + " {\n";
-                        pageFileContents[i] += '\t\tposition: absolute;\n';
+                        pageFileContents[i] += '\t\tposition: relative;\n';
                         pageFileContents[i] += '\t\ttop: '+sel.y+'px;\n';
                         pageFileContents[i] += '\t\tleft: '+sel.x+'px;\n';
                         pageFileContents[i] += '\t}\n';
@@ -2250,7 +2250,7 @@
             createPageFile();
             createAddedFile();
             makeZip();
-            console.log(componentArray)
+            console.log(pageArray)
         }}
         ></CustomTool2>
 
