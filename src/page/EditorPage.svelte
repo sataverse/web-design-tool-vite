@@ -2000,13 +2000,20 @@
                         componentFileContents[i] += "\t#" + obj.object.id + " {\n";
 
                         //넓이, 높이, 위치 좌표
-                        componentFileContents[i] += '\t\twidth: '+Math.ceil(obj.object.width)+'px;\n';
+                        componentFileContents[i] += '\t\tposition: absolute;\n';
+                        if(obj.tagType == 'text'){
+                            componentFileContents[i] += '\t\twidth: '+Math.ceil(obj.object.width+10)+'px;\n';
+                        } else {
+                            componentFileContents[i] += '\t\twidth: '+Math.ceil(obj.object.width)+'px;\n';
+                        }
                         componentFileContents[i] += '\t\theight: '+Math.ceil(obj.object.height)+'px;\n';
                         componentFileContents[i] += '\t\tleft: '+Math.ceil(obj.object.left)+'px;\n';
                         componentFileContents[i] += '\t\ttop: '+Math.ceil(obj.object.top)+'px;\n';
 
                         //배경색
-                        componentFileContents[i] += '\t\tbackground-color: '+obj.object.fill+';\n';
+                        if(obj.tagType == 'rect'){
+                            componentFileContents[i] += '\t\tbackground-color: '+obj.object.fill+';\n';
+                        }
 
                         //테두리
                         if(obj.object.stroke != null && obj.object.strokeWidth != null){
@@ -2061,6 +2068,8 @@
                     if(sel.componentId != '//deleted//'){
                         pageFileContents[i] += "\t#" + sel.componentId + " {\n";
                         pageFileContents[i] += '\t\tposition: absolute;\n';
+                        pageFileContents[i] += '\t\ttop: '+sel.y+'px;\n';
+                        pageFileContents[i] += '\t\tleft: '+sel.x+'px;\n';
                         pageFileContents[i] += '\t}\n';
                     }
                 });
@@ -2241,7 +2250,7 @@
             createPageFile();
             createAddedFile();
             makeZip();
-            console.log(pageFileContents)
+            console.log(componentArray)
         }}
         ></CustomTool2>
 
