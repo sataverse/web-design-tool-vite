@@ -1,4 +1,7 @@
 <script>
+    import {onMount, beforeUpdate, afterUpdate, onDestroy, tick} from 'svelte'
+
+    import CustomRadioButton from './CustomRadioButton.svelte';
     
     import { createEventDispatcher } from 'svelte';
 
@@ -6,6 +9,7 @@
     import CustomColorPicker from './CustomColorPicker.svelte';
     import CustromHr from './CustomHr.svelte'
     import CustomSelectComponent from './CustomSelectComponent.svelte'
+    import CustomEventProperty from './CustomEventProperty.svelte';
     
 
     export let type;
@@ -13,9 +17,15 @@
     export let currentComponent = null;
     export let componentArray = null;
     export let currentSelect;
+    export let pageArray;
+    export let currentPageMode;
+    export let propertyOrEvent = 'property';
 
     let CustomSelectComponentChild;
+    let CustomEventComponentChild;
 
+
+    
 
     class CurrentObjectClass {
         constructor() {
@@ -60,8 +70,11 @@
 
 	const dispatch = createEventDispatcher();
 
-    export function refresh(data) {
-        CustomSelectComponentChild.refresh(data);
+    export function refresh(data, type) {
+        if (type == 'select')
+            CustomSelectComponentChild.refresh(data);
+        else if (type == 'event')
+            CustomEventComponentChild.refresh(data);
     }
 
 </script>
@@ -71,189 +84,226 @@
 
 <div class="blank"></div>
 
+{#if currentPageMode == 'component' && type != 'component'}
+    <CustomRadioButton {propertyOrEvent} on:select={(event)=>{
+        propertyOrEvent = event.detail.data;
+    }}></CustomRadioButton>
+{/if}
 
-{#if type == 'rect'}
-    <CustomTextField type={1} title={["ID"]} data={[currentObject.id]} dataType={'string'} on:message={(event)=>{
-        currentObject.id = event.detail.data[0]
-        dispatch('editObjectProperty', {
-            id: currentObject.id,
-        });
-    }}></CustomTextField>
+{#if propertyOrEvent == 'property'}
 
-    <div class="blank"></div>
+    {#if type == 'rect'}
+        <CustomTextField type={1} title={["ID"]} data={[currentObject.id]} dataType={'string'} on:message={(event)=>{
+            currentObject.id = event.detail.data[0]
+            dispatch('editObjectProperty', {
+                id: currentObject.id,
+            });
+        }}></CustomTextField>
 
-    <CustomTextField type={2} title={["X", "Y"]} data={[currentObject.x, currentObject.y]} dataType={'int'} on:message={(event)=>{
-        currentObject.x = event.detail.data[0] * 1;
-        currentObject.y = event.detail.data[1] * 1;
-        dispatch('editObjectProperty', {
-            x: parseInt(currentObject.x),
-            y: parseInt(currentObject.y),
-        });
-    }}></CustomTextField>
+        <div class="blank"></div>
 
-    <div class="blank"></div>
+        <CustomTextField type={2} title={["X", "Y"]} data={[currentObject.x, currentObject.y]} dataType={'int'} on:message={(event)=>{
+            currentObject.x = event.detail.data[0] * 1;
+            currentObject.y = event.detail.data[1] * 1;
+            dispatch('editObjectProperty', {
+                x: parseInt(currentObject.x),
+                y: parseInt(currentObject.y),
+            });
+        }}></CustomTextField>
 
-    <CustomTextField type={2} title={["W", "H"]} data={[currentObject.width, currentObject.height]} dataType={'int'} on:message={(event)=>{
-        currentObject.width = event.detail.data[0] * 1;
-        currentObject.height = event.detail.data[1] * 1;
-        dispatch('editObjectProperty', {
-            width: currentObject.width,
-            height: currentObject.height,
-        });
-    }}></CustomTextField>
+        <div class="blank"></div>
 
-    <div class="blank"></div>
+        <CustomTextField type={2} title={["W", "H"]} data={[currentObject.width, currentObject.height]} dataType={'int'} on:message={(event)=>{
+            currentObject.width = event.detail.data[0] * 1;
+            currentObject.height = event.detail.data[1] * 1;
+            dispatch('editObjectProperty', {
+                width: currentObject.width,
+                height: currentObject.height,
+            });
+        }}></CustomTextField>
 
-    <CustomColorPicker title={"Color"} data={currentObject.color} on:message={(event)=>{
-        currentObject.color = event.detail.data
-        dispatch('editObjectProperty', {
-            color: currentObject.color,
-        });
-    }}></CustomColorPicker>
+        <div class="blank"></div>
 
-    <div class="blank"></div>
+        <CustomColorPicker title={"Color"} data={currentObject.color} on:message={(event)=>{
+            currentObject.color = event.detail.data
+            dispatch('editObjectProperty', {
+                color: currentObject.color,
+            });
+        }}></CustomColorPicker>
 
-    <CustomColorPicker title={"Stroke"} data={currentObject.stroke} data2={currentObject.strokeWidth} on:message={(event)=>{
-        currentObject.stroke = event.detail.data.toUpperCase();
-        currentObject.strokeWidth = event.detail.data2 * 1;
-        dispatch('editObjectProperty', {
-            stroke: currentObject.stroke,
-            strokeWidth: currentObject.strokeWidth,
-        });
-    }}></CustomColorPicker>
-    
-{:else if type == 'ellipse'}
-    <CustomTextField type={1} title={["ID"]} data={[currentObject.id]} dataType={'string'} on:message={(event)=>{
-        currentObject.id = event.detail.data[0]
-        dispatch('editObjectProperty', {
-            id: currentObject.id,
-        });
-    }}></CustomTextField>
+        <div class="blank"></div>
 
-    <div class="blank"></div>
+        <CustomColorPicker title={"Stroke"} data={currentObject.stroke} data2={currentObject.strokeWidth} on:message={(event)=>{
+            currentObject.stroke = event.detail.data.toUpperCase();
+            currentObject.strokeWidth = event.detail.data2 * 1;
+            dispatch('editObjectProperty', {
+                stroke: currentObject.stroke,
+                strokeWidth: currentObject.strokeWidth,
+            });
+        }}></CustomColorPicker>
+        
+    {:else if type == 'ellipse'}
+        <CustomTextField type={1} title={["ID"]} data={[currentObject.id]} dataType={'string'} on:message={(event)=>{
+            currentObject.id = event.detail.data[0]
+            dispatch('editObjectProperty', {
+                id: currentObject.id,
+            });
+        }}></CustomTextField>
 
-    <CustomTextField type={2} title={["X", "Y"]} data={[currentObject.x, currentObject.y]} dataType={'int'} on:message={(event)=>{
-        currentObject.x = event.detail.data[0] * 1;
-        currentObject.y = event.detail.data[1] * 1;
-        dispatch('editObjectProperty', {
-            x: currentObject.x,
-            y: currentObject.y,
-        });
-    }}></CustomTextField>
+        <div class="blank"></div>
 
-    <div class="blank"></div>
+        <CustomTextField type={2} title={["X", "Y"]} data={[currentObject.x, currentObject.y]} dataType={'int'} on:message={(event)=>{
+            currentObject.x = event.detail.data[0] * 1;
+            currentObject.y = event.detail.data[1] * 1;
+            dispatch('editObjectProperty', {
+                x: currentObject.x,
+                y: currentObject.y,
+            });
+        }}></CustomTextField>
 
-    <CustomTextField type={2} title={["W", "H"]} data={[currentObject.width, currentObject.height]} dataType={'int'} on:message={(event)=>{
-        currentObject.width = event.detail.data[0] * 1;
-        currentObject.height = event.detail.data[1] * 1;
-        dispatch('editObjectProperty', {
-            width: currentObject.width,
-            height: currentObject.height,
-        });
-    }}></CustomTextField>
+        <div class="blank"></div>
 
-    <div class="blank"></div>
+        <CustomTextField type={2} title={["W", "H"]} data={[currentObject.width, currentObject.height]} dataType={'int'} on:message={(event)=>{
+            currentObject.width = event.detail.data[0] * 1;
+            currentObject.height = event.detail.data[1] * 1;
+            dispatch('editObjectProperty', {
+                width: currentObject.width,
+                height: currentObject.height,
+            });
+        }}></CustomTextField>
 
-    <CustomColorPicker title={"Color"} data={currentObject.color} on:message={(event)=>{
-        currentObject.color = event.detail.data
-        dispatch('editObjectProperty', {
-            color: currentObject.color,
-        });
-    }}></CustomColorPicker>
+        <div class="blank"></div>
 
-    <div class="blank"></div>
+        <CustomColorPicker title={"Color"} data={currentObject.color} on:message={(event)=>{
+            currentObject.color = event.detail.data
+            dispatch('editObjectProperty', {
+                color: currentObject.color,
+            });
+        }}></CustomColorPicker>
 
-    <CustomColorPicker title={"Stroke"} data={currentObject.stroke} data2={currentObject.strokeWidth} on:message={(event)=>{
-        currentObject.stroke = event.detail.data.toUpperCase();
-        currentObject.strokeWidth = event.detail.data2 * 1;
-        dispatch('editObjectProperty', {
-            stroke: currentObject.stroke,
-            strokeWidth: currentObject.strokeWidth,
-        });
-    }}></CustomColorPicker>
+        <div class="blank"></div>
 
-{:else if type == 'textBox'}
-    <CustomTextField type={1} title={["ID"]} data={[currentObject.id]} dataType={'string'} on:message={(event)=>{
-        currentObject.id = event.detail.data[0]
-        dispatch('editObjectProperty', {
-            id: currentObject.id,
-        });
-    }}></CustomTextField>
+        <CustomColorPicker title={"Stroke"} data={currentObject.stroke} data2={currentObject.strokeWidth} on:message={(event)=>{
+            currentObject.stroke = event.detail.data.toUpperCase();
+            currentObject.strokeWidth = event.detail.data2 * 1;
+            dispatch('editObjectProperty', {
+                stroke: currentObject.stroke,
+                strokeWidth: currentObject.strokeWidth,
+            });
+        }}></CustomColorPicker>
 
-    <div class="blank"></div>
+    {:else if type == 'textBox'}
+        <CustomTextField type={1} title={["ID"]} data={[currentObject.id]} dataType={'string'} on:message={(event)=>{
+            currentObject.id = event.detail.data[0]
+            dispatch('editObjectProperty', {
+                id: currentObject.id,
+            });
+        }}></CustomTextField>
 
-    <CustomTextField type={2} title={["X", "Y"]} data={[currentObject.x, currentObject.y]} dataType={'int'} on:message={(event)=>{
-        currentObject.x = event.detail.data[0] * 1;
-        currentObject.y = event.detail.data[1] * 1;
-        dispatch('editObjectProperty', {
-            x: currentObject.x,
-            y: currentObject.y,
-        });
-    }}></CustomTextField>
+        <div class="blank"></div>
 
-    <div class="blank"></div>
+        <CustomTextField type={2} title={["X", "Y"]} data={[currentObject.x, currentObject.y]} dataType={'int'} on:message={(event)=>{
+            currentObject.x = event.detail.data[0] * 1;
+            currentObject.y = event.detail.data[1] * 1;
+            dispatch('editObjectProperty', {
+                x: currentObject.x,
+                y: currentObject.y,
+            });
+        }}></CustomTextField>
 
-    <CustomTextField type={1} title={["Fs"]} data={[currentObject.fontSize]} dataType={'int'} on:message={(event)=>{
-        currentObject.fontSize = event.detail.data[0] * 1;
-        dispatch('editObjectProperty', {
-            fontSize: currentObject.fontSize,
-        });
-    }}></CustomTextField>
+        <div class="blank"></div>
 
-    <div class="blank"></div>
+        <CustomTextField type={1} title={["Fs"]} data={[currentObject.fontSize]} dataType={'int'} on:message={(event)=>{
+            currentObject.fontSize = event.detail.data[0] * 1;
+            dispatch('editObjectProperty', {
+                fontSize: currentObject.fontSize,
+            });
+        }}></CustomTextField>
 
-    <CustomColorPicker title={"Color"} data={currentObject.color} on:message={(event)=>{
-        currentObject.color = event.detail.data;
-        dispatch('editObjectProperty', {
-            color: currentObject.color,
-        });
-    }}></CustomColorPicker>
+        <div class="blank"></div>
 
-{:else if type == 'component'}
+        <CustomColorPicker title={"Color"} data={currentObject.color} on:message={(event)=>{
+            currentObject.color = event.detail.data;
+            dispatch('editObjectProperty', {
+                color: currentObject.color,
+            });
+        }}></CustomColorPicker>
 
-    <CustomTextField type={1} title={["Width"]} data={[currentComponent.width]} size={[148, 50]} dataType={'int'} on:message={(event)=>{
-        currentComponent.width = event.detail.data[0] * 1;
-        dispatch('editComponentProperty', {
-            width: currentComponent.width,
-        });
-    }}></CustomTextField>
+    {:else if type == 'component'}
 
-    <div class="blank"></div>
+        <CustomTextField type={1} title={["Width"]} data={[currentComponent.width]} size={[148, 50]} dataType={'int'} on:message={(event)=>{
+            currentComponent.width = event.detail.data[0] * 1;
+            dispatch('editComponentProperty', {
+                width: currentComponent.width,
+            });
+        }}></CustomTextField>
 
-    <CustomTextField type={1} title={["Height"]} data={[currentComponent.height]} size={[148, 50]} dataType={'int'} on:message={(event)=>{
-        currentComponent.height = event.detail.data[0] * 1;
-        dispatch('editComponentProperty', {
-            height: currentComponent.height,
-        });
-    }}></CustomTextField>
+        <div class="blank"></div>
 
-{:else if type == 'componentImage'}
-    {currentObject.id}
-    <CustomTextField type={2} title={["X", "Y"]} data={[currentObject.x, currentObject.y]} dataType={'int'} on:message={(event)=>{
-        currentObject.x = event.detail.data[0] * 1;
-        currentObject.y = event.detail.data[1] * 1;
-        dispatch('editComponentImageProperty', {
-            x: currentObject.x,
-            y: currentObject.y,
-        });
-    }}></CustomTextField>
+        <CustomTextField type={1} title={["Height"]} data={[currentComponent.height]} size={[148, 50]} dataType={'int'} on:message={(event)=>{
+            currentComponent.height = event.detail.data[0] * 1;
+            dispatch('editComponentProperty', {
+                height: currentComponent.height,
+            });
+        }}></CustomTextField>
 
-{:else if type == 'page'}
+    {:else if type == 'componentImage'}
+        {currentObject.id}
+        <CustomTextField type={2} title={["X", "Y"]} data={[currentObject.x, currentObject.y]} dataType={'int'} on:message={(event)=>{
+            currentObject.x = event.detail.data[0] * 1;
+            currentObject.y = event.detail.data[1] * 1;
+            dispatch('editComponentImageProperty', {
+                x: currentObject.x,
+                y: currentObject.y,
+            });
+        }}></CustomTextField>
 
-    <CustomSelectComponent bind:this={CustomSelectComponentChild} {componentArray} {currentSelect} on:selectComponent1={(event)=>{
-        //console.log(event.detail.data)
-        dispatch('selectComponent2', {
+    {:else if type == 'page'}
+
+        <CustomSelectComponent bind:this={CustomSelectComponentChild} {componentArray} {currentSelect} on:selectComponent1={(event)=>{
+            //console.log(event.detail.data)
+            dispatch('selectComponent2', {
+                data: event.detail.data,
+            });
+        }}
+        on:deselectComponent1={(event)=>{
+            //console.log(event.detail.data)
+            dispatch('deselectComponent2', {
+                data: event.detail.data,
+                componentIndex: event.detail.componentIndex,
+                list: event.detail.list,
+            });
+        }}/>
+    {/if}
+
+{:else if propertyOrEvent == 'event'}
+    <CustomEventProperty {currentObject} {pageArray} bind:this={CustomEventComponentChild}
+
+    on:when={(event)=>{
+        dispatch('eventWhen', {
             data: event.detail.data,
         });
     }}
-    on:deselectComponent1={(event)=>{
-        //console.log(event.detail.data)
-        dispatch('deselectComponent2', {
+
+    on:do={(event)=>{
+        dispatch('eventDo', {
             data: event.detail.data,
-            componentIndex: event.detail.componentIndex,
-            list: event.detail.list,
         });
-    }}/>
+    }}
+
+    on:detail={(event)=>{
+        dispatch('eventDetail', {
+            data: event.detail.data,
+        });
+    }}
+    
+    on:reset={(event)=>{
+        dispatch('eventReset', {
+        });
+    }}
+    
+    
+    ></CustomEventProperty>
 {/if}
 
 <style>

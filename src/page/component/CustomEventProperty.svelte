@@ -1,4 +1,6 @@
 <script>
+
+    import { afterUpdate } from 'svelte'
     
     import { createEventDispatcher } from 'svelte';
 
@@ -6,27 +8,67 @@
     import CustomDropDown from './CustomDropDown.svelte';
 
     export let currentObject;
+    export let pageArray;
+
+    //console.log(currentObject.Event)
+
+    let heightVar = 26;
+
+    let valueWhen = null;
+    let valueDo = null;
+    let valueDetail = null;
+
+    if (currentObject.Event.when != null) {
+        valueWhen = currentObject.Event.when;
+        heightVar = 26;
+    }
+
+    if (currentObject.Event.do != null) {
+        valueDo = currentObject.Event.do;
+        heightVar = 52;
+    }
+
+    if (currentObject.Event.detail != null) {
+        valueDetail = currentObject.Event.detail;
+        heightVar = 83;
+    }
 
     let textField;
     let textFieldData;
 
 	const dispatch = createEventDispatcher();
 
-    let heightVar = 26;
+
 
     let eventProperty;
+    let pageList = Array(0);
 
     function resetEvent() {
         currentObject.Event.when = null;
         currentObject.Event.do = null;
         currentObject.Event.detail = null;
-        dispatch('message', {
-            data: currentObject,
+        valueWhen = null;
+        valueDo = null;
+        valueDetail = null;
+        dispatch('reset', {
         });
         heightVar = 26;
     }
 
-    
+    export function refresh(data) {
+        currentObject = data;
+    }
+
+    afterUpdate(async () => {
+        pageList = Array(0);
+
+        pageArray.forEach(element => {
+            if (element.path != '//deleted//') {
+                pageList[pageList.length] = element.path;
+            }
+        });
+    });
+
 
     
 </script>
@@ -35,22 +77,20 @@
 
 <main>
     
-    <div class="blank"></div>
     <div id="event-property" bind:this={eventProperty}>
         <div id="event-block" style="height:{heightVar}px">
-            <CustomDropDown title={'when'} items={['Click', 'Mouse Over']} borderStyle={false} on:message={(Event)=>{
-                currentObject.Event.when = Event.detail.data;
-                dispatch('message', {
-                    data: currentObject,
+
+            <CustomDropDown title={'when'} type={'when'} {valueWhen} {valueDo} {valueDetail} items={['Click', 'Mouse Over']} borderStyle={false} on:message={(event)=>{
+                dispatch('when', {
+                    data: event.detail.data,
                 });
                 heightVar = 52;
             }}></CustomDropDown>
 
             {#if currentObject.Event.when}
-                <CustomDropDown title={'do'} items={['Move Page', 'Alert', 'Style']} borderStyle={false} on:message={(Event)=>{
-                    currentObject.Event.do = Event.detail.data;
-                    dispatch('message', {
-                        data: currentObject,
+                <CustomDropDown title={'do'} type={'do'}  {valueWhen} {valueDo} {valueDetail} items={['Move Page', 'Alert', 'Style']} borderStyle={false} on:message={(event)=>{
+                    dispatch('do', {
+                        data: event.detail.data,
                     });
                     heightVar = 83;
                 }}></CustomDropDown>
@@ -58,26 +98,23 @@
 
 
             {#if currentObject.Event.do == 'Move Page'}
-                <CustomDropDown title={'to'} items={['Page1', 'Page2']} borderStyle={false} on:message={(Event)=>{
-                    currentObject.Event.detail = Event.detail.data;
-                    dispatch('message', {
-                        data: currentObject,
+                <CustomDropDown title={'to'} type={'detail'}  {valueWhen} {valueDo} {valueDetail} items={pageList} borderStyle={false} on:message={(event)=>{
+                    dispatch('detail', {
+                        data: event.detail.data,
                     });
                 }}></CustomDropDown>
 
             {:else if currentObject.Event.do == 'Alert'}
                 <CustomTextField type={1} title={[""]} data={[textFieldData]} dataType={'string'} borderStyle={false} on:message={(event)=>{
-                    currentObject.Event.detail = event.detail.data[0];
-                    dispatch('message', {
-                        data: currentObject,
+                    dispatch('detail', {
+                        data: event.detail.data[0],
                     });
                 }}></CustomTextField>
 
             {:else if currentObject.Event.do == 'Style'}
                 <CustomTextField type={1} title={[""]} data={[textFieldData]} dataType={'string'} borderStyle={false} on:message={(event)=>{
-                    currentObject.Event.detail = event.detail.data[0];
-                    dispatch('message', {
-                        data: currentObject,
+                    dispatch('detail', {
+                        data: event.detail.data[0],
                     });
                 }}></CustomTextField>
             {/if}

@@ -35,11 +35,17 @@
         titleWidth = 50;
     }
 
+    if (title[0] == 'Fs') {
+        width = 148;
+        inputWidth = 118
+    }
+
+
     
 
     onMount(async () => {
         if (title[0] == '') {
-            inputWidth = 138;
+            inputWidth = 130;
             textField.style.marginLeft = '5px';
         }
 

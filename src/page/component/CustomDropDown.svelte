@@ -8,6 +8,31 @@
     export let items;
     export let borderStyle = true;
 
+    export let valueWhen = null;
+    export let valueDo = null;
+    export let valueDetail = null;
+    export let type;
+
+    let value = null;
+
+
+    if (valueWhen != null && type == 'when') {
+        value = valueWhen;
+    }
+
+    if (valueDo != null && type == 'do') {
+        value = valueDo;
+    }
+
+    if (valueDetail != null && type == 'detail') {
+        value = valueDetail;
+    }
+
+    //console.log(value)
+
+
+
+
 
 	const dispatch = createEventDispatcher();
 
@@ -34,7 +59,7 @@
                 
                 <div style="width: 100px;">
                     <form id="form-style">
-                        <Select {items} showChevron={true} on:select={selectFunc}></Select>
+                        <Select {items} {value} showChevron={true} on:select={selectFunc}></Select>
                     </form>
                 </div>
             </div>
@@ -46,7 +71,7 @@
                 
                 <div style="width: 100px;">
                     <form id="form-style">
-                        <Select {items} showChevron={true} on:select={selectFunc}></Select>
+                        <Select {items} {value} showChevron={true} on:select={selectFunc}></Select>
                     </form>
                 </div>
             </div>

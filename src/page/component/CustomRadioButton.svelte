@@ -1,12 +1,30 @@
 <script>
+    import { afterUpdate } from 'svelte'
     import { createEventDispatcher } from 'svelte';
+    export let propertyOrEvent;
+
+
   	const dispatch = createEventDispatcher();
     function selectRadioButton(event) {
-        dispatch('message', {
-            data: event.currentTarget.value,
+        dispatch('select', {
+            data: event.currentTarget.value.toLowerCase(),
         });
     }
 
+    afterUpdate(async () => {
+        if (propertyOrEvent == 'property'){
+            // @ts-ignore
+            document.getElementById('radioProperty').checked = true;
+        }
+        else if (propertyOrEvent == 'event'){
+            // @ts-ignore
+            document.getElementById('radioEvent').checked = true;
+        }
+    });
+
+        
+    
+            
     
 
 </script>
@@ -14,7 +32,7 @@
 <main>
     <div id="select-property-or-event" >
         <div class="flex-column" >
-            <input type='radio'  class="property-or-event-input-class" value='Property' name='propertyOrEvent' id='radioProperty' on:change={selectRadioButton} checked/>
+            <input type='radio' class="property-or-event-input-class" value='Property' name='propertyOrEvent' id='radioProperty' on:change={selectRadioButton} checked/>
             <label for='radioProperty' class="property-or-event-label-class" >Property</label>
         </div>
         <div class="flex-column">
@@ -23,6 +41,7 @@
         </div>
     </div>
 </main>
+
 
 
 

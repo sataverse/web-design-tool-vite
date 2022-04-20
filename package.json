@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "fabric": "^5.2.1",
-    "jszip": "^3.9.1"
+    "jszip": "^3.9.1",
+    "svelte-routing": "^1.6.0"
   }
 }

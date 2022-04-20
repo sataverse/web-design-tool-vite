@@ -15,6 +15,7 @@
 
 
 
+
     let innerWidth = window.innerWidth;
     let innerHeight = window.innerHeight;
 
@@ -118,6 +119,13 @@
             this.index = index;
             this.componentIndex = componentIndex;
             this.tagType = tagType;
+            this.Event = new class Event {
+                constructor() {
+                    this.when = null;
+                    this.do = null;
+                    this.detail = null;
+                }
+            };
         }
     }
 
@@ -135,6 +143,7 @@
             //this.clickedObjectType = 'rect';
             this.propertyOrEvent = 'property';
             this.pageOrComponent = 'page';
+            this.propertyOrEvent = 'property';
             this.currentZoom = null;
             this.currentPageMode = 'page';
             this.componentIndex = 0;
@@ -386,36 +395,46 @@
                         else if (event.target.id != '///defaultBox///' && event.target.id != '///defaultText///') {
                             
                             let activeObject = componentArray[0].canvas.getActiveObject();
-
                             currentObject.id = activeObject.id;
                             currentObject.x = activeObject.left;
                             currentObject.y = activeObject.top;
                             currentObject.width = activeObject.width;
                             currentObject.height = activeObject.height;
                             currentObject.color = activeObject.fill.substr(1);  
-                            currentObject.stroke = activeObject.stroke.substr(1);
-                            currentObject.strokeWidth = activeObject.strokeWidth;
+                            
+
+                            componentArray[0].object.forEach(element => {
+                                if (element.object.id == currentObject.id) {
+                                    currentObject.Event.when = element.Event.when;
+                                    currentObject.Event.do = element.Event.do;
+                                    currentObject.Event.detail = element.Event.detail;
+                                }
+                            });
 
                             if (activeObject.type == 'rect') {
                                 ui.objectType = 'rect';
+                                currentObject.stroke = activeObject.stroke.substr(1);
+                                currentObject.strokeWidth = activeObject.strokeWidth;
                             }
 
                             else if (activeObject.type == 'ellipse') {
                                 ui.objectType = 'ellipse';
+                                currentObject.stroke = activeObject.stroke.substr(1);
+                                currentObject.strokeWidth = activeObject.strokeWidth;
                             }
 
                             else if (activeObject.type == 'textbox') {
                                 ui.objectType = 'textBox';
                                 currentObject.fontSize = activeObject.fontSize;
                             }
-
-                            
                         }
                         else {
                             ui.objectType = 'component';
                             currentComponent.width = componentArray[0].defaultObject.box.width;
                             currentComponent.height = componentArray[0].defaultObject.box.height;
                         }
+
+                        ui.propertyOrEvent = 'property';
                     }
                     else if (ui.mouseType == 2) {
 
@@ -452,6 +471,9 @@
                         currentObject.stroke = currentObject.object.stroke.substr(1);
                         currentObject.strokeWidth = currentObject.object.strokeWidth;
                         currentObject.tagType = 'rect';
+                        currentObject.Event.when = null;
+                        currentObject.Event.do = null;
+                        currentObject.Event.detail = null;
                         fabric.Object.prototype.selectable = true;
                         
                         ui.currentComponentObjectArray = componentArray[0].object;
@@ -492,6 +514,9 @@
                         currentObject.color = currentObject.object.fill.substr(1);  
                         currentObject.stroke = currentObject.object.stroke.substr(1);
                         currentObject.strokeWidth = currentObject.object.strokeWidth;
+                        currentObject.Event.when = null;
+                        currentObject.Event.do = null;
+                        currentObject.Event.detail = null;
                         currentObject.tagType = 'ellipse';
                         fabric.Object.prototype.selectable = true;
 
@@ -540,6 +565,9 @@
                         currentObject.y = componentArray[0].object[objectIndex].object.top;
                         currentObject.fontSize = componentArray[0].object[objectIndex].object.fontSize;
                         currentObject.color = currentObject.object.fill.substr(1);
+                        currentObject.Event.when = null;
+                        currentObject.Event.do = null;
+                        currentObject.Event.detail = null;
 
                         componentArray.forEach((element) => {
                             element.canvas.defaultCursor = `url("../icon/Cursor1.png"), auto`;
@@ -1188,7 +1216,7 @@
             ui.currentPageMode = 'page';
             ui.objectType = 'page';
 
-            CustomPropertyChild.refresh(ui.currentSelect)
+            CustomPropertyChild.refresh(ui.currentSelect, 'select')
             
         }
 
@@ -1380,26 +1408,40 @@
                             currentObject.y = activeObject.top;
                             currentObject.width = activeObject.width;
                             currentObject.height = activeObject.height;
-                            currentObject.color = activeObject.fill.substr(1);  
-                            currentObject.stroke = activeObject.stroke.substr(1);
-                            currentObject.strokeWidth = activeObject.strokeWidth;
+                            currentObject.color = activeObject.fill.substr(1); 
+
+                            componentArray[0].object.forEach(element => {
+                                if (element.object.id == currentObject.id) {
+                                    currentObject.Event.when = element.Event.when;
+                                    currentObject.Event.do = element.Event.do;
+                                    currentObject.Event.detail = element.Event.detail;
+                                }
+                            });
+                            
 
                             if (activeObject.type == 'rect') {
                                 ui.objectType = 'rect';
+                                currentObject.stroke = activeObject.stroke.substr(1);
+                                currentObject.strokeWidth = activeObject.strokeWidth;
                             }
                             else if (activeObject.type == 'ellipse') {
                                 ui.objectType = 'ellipse';
+                                currentObject.stroke = activeObject.stroke.substr(1);
+                                currentObject.strokeWidth = activeObject.strokeWidth;
                             }  
                             else if (activeObject.type == 'textbox') {
                                 ui.objectType = 'textBox';
                                 currentObject.fontSize = activeObject.fontSize;
                             }
+
+                            
                         }
                         else {
                             ui.objectType = 'component';
                             currentComponent.width = componentArray[length].defaultObject.box.width;
                             currentComponent.height = componentArray[length].defaultObject.box.height;
                         }
+                        ui.propertyOrEvent = 'property';
                     }
                     else if (ui.mouseType == 2) {
 
@@ -1437,6 +1479,9 @@
                         currentObject.stroke = currentObject.object.stroke.substr(1);
                         currentObject.strokeWidth = currentObject.object.strokeWidth;
                         fabric.Object.prototype.selectable = true;
+                        currentObject.Event.when = null;
+                        currentObject.Event.do = null;
+                        currentObject.Event.detail = null;
 
                         ui.currentComponentObjectArray = componentArray[length].object;
                         ui.objectType = 'rect';
@@ -1479,6 +1524,9 @@
                         currentObject.stroke = currentObject.object.stroke.substr(1);
                         currentObject.strokeWidth = currentObject.object.strokeWidth;
                         fabric.Object.prototype.selectable = true;
+                        currentObject.Event.when = null;
+                        currentObject.Event.do = null;
+                        currentObject.Event.detail = null;
 
                         ui.currentComponentObjectArray = componentArray[length].object;
                         ui.objectType = 'ellipse';
@@ -1522,6 +1570,10 @@
                         currentObject.y = componentArray[length].object[objectIndex].object.top;
                         currentObject.fontSize = componentArray[length].object[objectIndex].object.fontSize;
                         currentObject.color = currentObject.object.fill.substr(1);
+
+                        currentObject.Event.when = null;
+                        currentObject.Event.do = null;
+                        currentObject.Event.detail = null;
 
                         componentArray.forEach((element) => {
                             element.canvas.defaultCursor = `url("../icon/Cursor1.png"), auto`;
@@ -1965,40 +2017,68 @@
 
 
 
-    //코드 생성 부분
 
+
+
+
+
+
+
+
+
+
+
+
+    
+    //코드 생성 부분
     const zip = new JSZip();
     var componentFileContents = [];
     var pageFileContents = [];
     var addedFileContents = [];
-
-
     function createComponentFile() {
         var i = 0;
-
         componentArray.forEach(comp => {
             componentFileContents[i] = '';
-
             if(comp.path != '//deleted//') {
-                
+                componentFileContents[i] += '<'+'script>\n';
+                componentFileContents[i] += '\timport { navigate } from "svelte-routing";\n'
+                componentFileContents[i] += '<'+'/script>\n';
                 comp.object.forEach(obj => {
-
                     if(obj.object.id != '//**//'){
                         componentFileContents[i] += '<' + 'div ';
-                        componentFileContents[i] += 'id="'+obj.object.id+'">';
+                        componentFileContents[i] += 'id="'+obj.object.id+'"';
+                        if(obj.Event.when != null){
+                            if(obj.Event.when == "Click"){
+                                if(obj.Event.do == "Move Page"){
+                                    if(obj.Event.detail == '/'){
+                                        componentFileContents[i] += ' on:click={() => { navigate("/", {replace: true}) }}';
+                                    } else {
+                                        componentFileContents[i] += ' on:click={() => { navigate("'+obj.Event.detail.substr(1)+'", {replace: true}) }}';
+                                    }
+                                } else {
+                                    componentFileContents[i] += ' on:click={() => { alert("'+obj.Event.detail+'") }}';
+                                }
+                            } else {
+                                if(obj.Event.do == "Move Page"){
+                                    if(obj.Event.detail == '/'){
+                                        componentFileContents[i] += ' on:mouseenter={() => { navigate("/", {replace: true}) }}';
+                                    } else {
+                                        componentFileContents[i] += ' on:mouseenter={() => { navigate("'+obj.Event.detail.substr(1)+'", {replace: true}) }}';
+                                    }
+                                } else {
+                                    componentFileContents[i] += ' on:mouseenter={() => { alert("'+obj.Event.detail+'") }}';
+                                }
+                            }
+                        }
+                        componentFileContents[i] += '>';
                         if(obj.tagType == 'textBox') componentFileContents[i] += obj.object.text;
                         componentFileContents[i] += '<' + '/div' + '>\n';
                     }
-
                 });
-
                 componentFileContents[i] += '\n<' + 'style>\n';
-
                 comp.object.forEach(obj => {
-
                     if(obj.object.id != '//**//'){
                         componentFileContents[i] += "\t#" + obj.object.id + " {\n";
-
                         //넓이, 높이, 위치 좌표
                         componentFileContents[i] += '\t\tposition: absolute;\n';
                         if(obj.tagType == 'text'){
@@ -2007,14 +2087,14 @@
                             componentFileContents[i] += '\t\twidth: '+Math.ceil(obj.object.width)+'px;\n';
                         }
                         componentFileContents[i] += '\t\theight: '+Math.ceil(obj.object.height)+'px;\n';
+                        
                         componentFileContents[i] += '\t\tleft: '+Math.ceil(comp.defaultObject.box.width/2 + obj.object.left)+'px;\n';
-                        componentFileContents[i] += '\t\ttop: '+Math.ceil(comp.defaultObject.box.height/2 - 20 + obj.object.top)+'px;\n';
 
+                        componentFileContents[i] += '\t\ttop: '+Math.ceil(comp.defaultObject.box.height/2 - 20 + obj.object.top)+'px;\n';
                         //배경색
                         if(obj.tagType == 'rect'){
                             componentFileContents[i] += '\t\tbackground-color: '+obj.object.fill+';\n';
                         }
-
                         //테두리
                         if(obj.object.stroke != null && obj.object.strokeWidth != null){
                             componentFileContents[i] += '\t\tborder: '+obj.object.strokeWidth+'px solid '+obj.object.stroke.toUpperCase()+';\n';
@@ -2024,27 +2104,19 @@
                         if(obj.tagType == 'textBox'){
                             componentFileContents[i] += '\t\tfont-size: '+obj.object.fontSize+'px;\n';
                         }
-
                         componentFileContents[i] += '\t}\n';
                     }
-
                 });
-
                 componentFileContents[i] += '<'+'/style>\n';
                 i+=1;
             }
         });
     }
-
-
     function createPageFile() {
         var i=0;
-
         pageArray.forEach(page =>{
             pageFileContents[i] = '';
-
             if(page.path != '//deleted//'){
-
                 pageFileContents[i] += '<'+'script>\n';
                 page.selectComponent.forEach(sel => {
                     if(sel.componentId != '//deleted//'){
@@ -2052,7 +2124,6 @@
                     }
                 });
                 pageFileContents[i] += '</'+'script>\n';
-
                 pageFileContents[i] += '<'+'main>\n';
                 page.selectComponent.forEach(sel => {
                     if(sel.componentId != '//deleted//'){
@@ -2062,7 +2133,6 @@
                     }
                 });
                 pageFileContents[i] += '</'+'main>\n';
-
                 pageFileContents[i] += '<'+'style>\n';
                 page.selectComponent.forEach(sel => {
                     if(sel.componentId != '//deleted//'){
@@ -2074,33 +2144,43 @@
                     }
                 });
                 pageFileContents[i] += '</'+'style>\n';
-
                 i+=1;
             }
         });
     }
-
     function createAddedFile() {
         var i = 1;
-
-
         //main.js
         addedFileContents[0] = 'import App from "./App.svelte";\n';
         addedFileContents[0] += 'var app = new App({target: document.body});\n';
         addedFileContents[0] += 'export default app;';
-
-
         //App.svelte
         addedFileContents[1] = '<'+'script>\n';
-        addedFileContents[1] += "\timport Root from './Root.svelte'\n";
-        addedFileContents[1] += '</'+'script>\n';
-        addedFileContents[1] += '<'+'main>\n';
-        addedFileContents[1] += '\t<'+'div id="root">\n';
-        addedFileContents[1] += '\t\t<'+'Root>'+'</'+'Root'+'>\n';
-        addedFileContents[1] += '\t</'+'div>\n';
-        addedFileContents[1] += '</'+'main>\n';
-
-
+        addedFileContents[1] += "\timport {Router, Route} from 'svelte-routing'\n";
+        pageArray.forEach(page => {
+            if(page.path != "//deleted//") {
+                if(page.path == '/'){
+                    addedFileContents[1] += "\timport Root from './Root.svelte'\n";
+                } else {
+                    addedFileContents[1] += "\timport "+page.path.substr(1)+" from './"+page.path.substr(1)+".svelte'\n";
+                }
+            }
+        });
+        addedFileContents[1] += "\n\tlet url = '/'\n";
+        addedFileContents[1] += '</'+'script>\n\n';
+        addedFileContents[1] += '<'+'Router {url}'+'>\n';
+        addedFileContents[1] += '\t<'+'div>\n';
+        pageArray.forEach(page => {
+            if(page.path != "//deleted//") {
+                if(page.path == '/'){
+                    addedFileContents[1] += "\t\t<"+"Route path='/'>"+"<"+"Root />"+"<"+"/Route>\n";
+                } else {
+                    addedFileContents[1] += "\t\t<"+"Route path='"+page.path.substr(1)+"'>"+"<"+page.path.substr(1)+" />"+"<"+"/Route>\n";
+                }
+            }
+        });
+        addedFileContents[1] += '\t<'+'/div>\n';
+        addedFileContents[1] += '<'+'/Router>\n';
         //global.css
         addedFileContents[2] = 'html, body {\n\tposition: relative;\n\twidth: 100%;\n\theight: 100%;\n}\n';
         addedFileContents[2] += 'body {\n\tcolor: #333;\n\tmargin: 0;\n\tpadding: 8px;\n\tbox-sizing: border-box;\n\t';
@@ -2116,8 +2196,6 @@
         addedFileContents[2] += 'button:disabled {\n\tcolor: #999;\n}\n';
         addedFileContents[2] += 'button:not(:disabled):active {\n\tbackground-color: #ddd;\n}\n';
         addedFileContents[2] += 'button:focus {\n\tborder-color: #666;\n}\n';
-
-
         //index.html
         addedFileContents[3] = '<!DOCTYPE html>\n';
         addedFileContents[3] += '<html lang="en">\n';
@@ -2129,12 +2207,8 @@
         addedFileContents[3] += "\t<link rel='stylesheet' href='/build/bundle.css'>\n";
         addedFileContents[3] += "\t<"+"script defer src='/build/bundle.js'><"+"/script>\n";
         addedFileContents[3] += '</head>\n<body>\n</body>\n</html>\n';
-
-
         //.gitignore
         addedFileContents[4] = '/node_modules/\n/public/build/\n\n.DS_Store\n';
-
-
         //package.json
         addedFileContents[5] = '{\n  "name": "svelte-app",\n  "version": "1.0.0",\n  "private": true,\n  "scripts": {\n';
         addedFileContents[5] += '    "build": "rollup -c",\n    "dev": "rollup -c -w",\n    "start": "sirv public --no-clear"    \n  },';
@@ -2142,8 +2216,6 @@
         addedFileContents[5] += '\n    "rollup": "^2.3.4",\n    "rollup-plugin-css-only": "^3.1.0",\n    "rollup-plugin-livereload": "^2.0.0",';
         addedFileContents[5] += '\n    "rollup-plugin-svelte": "^7.0.0",\n    "rollup-plugin-terser": "^7.0.0",\n    "svelte": "^3.0.0"\n  },';
         addedFileContents[5] += '\n  "dependencies": {\n    "sirv-cli": "^2.0.0"\n  }\n}\n';
-
-
         //rollup.config.js
         addedFileContents[6] = "import svelte from 'rollup-plugin-svelte';\n";
         addedFileContents[6] += "import commonjs from '@rollup/plugin-commonjs';\n";
@@ -2166,31 +2238,22 @@
         addedFileContents[6] += "\n\t\t!production && serve(),\n\t\t!production && livereload('public'),\n\t\tproduction && terser()";
         addedFileContents[6] += "\n\t],\n\twatch: {\n\t\tclearScreen: false\n\t}\n};\n";
     }
-
     function makeZip() {
         var i = 0;
-
         var mainJavascriptFile = new Blob([addedFileContents[0]], {type:'text/plain'});
         zip.folder("src").file("main.js", mainJavascriptFile);
-
         var appSvelteFile = new Blob([addedFileContents[1]], {type:'text/plain'});
         zip.folder("src").file("App.svelte", appSvelteFile);
-
         var globalCssFile = new Blob([addedFileContents[2]], {type:'text/plain'});
         zip.folder("public").file("global.css", globalCssFile);
-
         var indexHtmlFile = new Blob([addedFileContents[3]], {type:'text/plain'});
         zip.folder("public").file("index.html", indexHtmlFile);
-
         var gitignoreFile = new Blob([addedFileContents[4]], {type:'text/plain'});
         zip.file(".gitignore", gitignoreFile);
-
         var packageJsonFile = new Blob([addedFileContents[5]], {type:'text/plain'});
         zip.file("package.json", packageJsonFile);
-
         var rollupFile = new Blob([addedFileContents[6]], {type:'text/plain'});
         zip.file("rollup.config.js", rollupFile);
-
         componentArray.forEach(comp => {
             if(comp.path != "//deleted//") {
                 var componentSvelteFile = new Blob([componentFileContents[i]], {type:'text/plain'});
@@ -2198,7 +2261,6 @@
                 i+=1;
             }
         });
-
         i = 0;
         pageArray.forEach(page => {
             if(page.path != "//deleted//") {
@@ -2211,7 +2273,6 @@
                 i+=1;
             }
         });
-
         zip.generateAsync({
             type: "blob",
             compression: "DEFLATE"
@@ -2250,9 +2311,8 @@
             createPageFile();
             createAddedFile();
             makeZip();
-            console.log(pageArray)
-        }}
-        ></CustomTool2>
+            console.log(componentArray[0].object[0].Event)
+        }}></CustomTool2>
 
     </div>
     <!-- 툴 -->
@@ -2322,7 +2382,7 @@
                         ui.currentSelect[index] = element.componentId;
                     });
 
-                    CustomPropertyChild.refresh(ui.currentSelect)
+                    CustomPropertyChild.refresh(ui.currentSelect, 'select')
 
                 }
                 else if (event.detail.pageOrComponent == 'component') {
@@ -2443,8 +2503,52 @@
 
         <!-- 속성 -->
         <div id="property-section-box">
-            <CustomProperty bind:this={CustomPropertyChild} type={ui.objectType} currentObject={currentObject} currentComponent={currentComponent}
-            {componentArray}  currentSelect={ui.currentSelect}
+            <CustomProperty bind:this={CustomPropertyChild} type={ui.objectType} currentObject={currentObject} currentComponent={currentComponent} 
+            {componentArray}  currentSelect={ui.currentSelect} currentPageMode={ui.currentPageMode} propertyOrEvent={ui.propertyOrEvent}
+            {pageArray}
+            on:eventWhen={(event)=>{
+                currentObject.Event.when = event.detail.data;
+                componentArray[ui.componentIndex].object.forEach(element => {
+                    // @ts-ignore
+                    if (element.object.id == currentObject.id) {
+                        element.Event.when = event.detail.data;
+                    }
+                });
+            }}
+
+            on:eventDo={(event)=>{
+                currentObject.Event.do = event.detail.data;
+                componentArray[ui.componentIndex].object.forEach(element => {
+                    // @ts-ignore
+                    if (element.object.id == currentObject.id) {
+                        element.Event.do = event.detail.data;
+                    }
+                });
+            }}
+
+            on:eventDetail={(event)=>{
+                currentObject.Event.detail = event.detail.data;
+                componentArray[ui.componentIndex].object.forEach(element => {
+                    // @ts-ignore
+                    if (element.object.id == currentObject.id) {
+                        element.Event.detail = event.detail.data;
+                    }
+                });
+            }}
+
+            on:eventReset={()=>{
+                currentObject.Event.when = null;
+                currentObject.Event.do = null;
+                currentObject.Event.detail = null;
+                componentArray[ui.componentIndex].object.forEach(element => {
+                    // @ts-ignore
+                    if (element.object.id == currentObject.id) {
+                        element.Event.when = null;
+                        element.Event.do = null;
+                        element.Event.detail = null;
+                    }
+                });
+            }}
 
             on:selectComponent2={(event)=>{
                 createComponentImage(event.detail.data);
