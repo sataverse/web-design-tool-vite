@@ -2041,7 +2041,7 @@
             componentFileContents[i] = '';
             if(comp.path != '//deleted//') {
                 componentFileContents[i] += '<'+'script>\n';
-                componentFileContents[i] += '\timport { navigate } from "svelte-routing";\n'
+                componentFileContents[i] += '\timport { push } from "svelte-spa-router";\n'
                 componentFileContents[i] += '<'+'/script>\n';
                 comp.object.forEach(obj => {
                     if(obj.object.id != '//**//'){
@@ -2050,21 +2050,13 @@
                         if(obj.Event.when != null){
                             if(obj.Event.when == "Click"){
                                 if(obj.Event.do == "Move Page"){
-                                    if(obj.Event.detail == '/'){
-                                        componentFileContents[i] += ' on:click={() => { navigate("/", {replace: true}) }}';
-                                    } else {
-                                        componentFileContents[i] += ' on:click={() => { navigate("'+obj.Event.detail.substr(1)+'", {replace: true}) }}';
-                                    }
+                                    componentFileContents[i] += ' on:click={() => { push("'+obj.Event.detail+'") }}';
                                 } else {
                                     componentFileContents[i] += ' on:click={() => { alert("'+obj.Event.detail+'") }}';
                                 }
                             } else {
                                 if(obj.Event.do == "Move Page"){
-                                    if(obj.Event.detail == '/'){
-                                        componentFileContents[i] += ' on:mouseenter={() => { navigate("/", {replace: true}) }}';
-                                    } else {
-                                        componentFileContents[i] += ' on:mouseenter={() => { navigate("'+obj.Event.detail.substr(1)+'", {replace: true}) }}';
-                                    }
+                                    componentFileContents[i] += ' on:mouseenter={() => { push("'+obj.Event.detail+'") }}';
                                 } else {
                                     componentFileContents[i] += ' on:mouseenter={() => { alert("'+obj.Event.detail+'") }}';
                                 }
@@ -2156,31 +2148,10 @@
         addedFileContents[0] += 'export default app;';
         //App.svelte
         addedFileContents[1] = '<'+'script>\n';
-        addedFileContents[1] += "\timport {Router, Route} from 'svelte-routing'\n";
-        pageArray.forEach(page => {
-            if(page.path != "//deleted//") {
-                if(page.path == '/'){
-                    addedFileContents[1] += "\timport Root from './Root.svelte'\n";
-                } else {
-                    addedFileContents[1] += "\timport "+page.path.substr(1)+" from './"+page.path.substr(1)+".svelte'\n";
-                }
-            }
-        });
-        addedFileContents[1] += "\n\tlet url = '/'\n";
+        addedFileContents[1] += "\timport Router from 'svelte-spa-router'\n";
+        addedFileContents[1] += "\timport routes from './routes'\n";
         addedFileContents[1] += '</'+'script>\n\n';
-        addedFileContents[1] += '<'+'Router {url}'+'>\n';
-        addedFileContents[1] += '\t<'+'div>\n';
-        pageArray.forEach(page => {
-            if(page.path != "//deleted//") {
-                if(page.path == '/'){
-                    addedFileContents[1] += "\t\t<"+"Route path='/'>"+"<"+"Root />"+"<"+"/Route>\n";
-                } else {
-                    addedFileContents[1] += "\t\t<"+"Route path='"+page.path.substr(1)+"'>"+"<"+page.path.substr(1)+" />"+"<"+"/Route>\n";
-                }
-            }
-        });
-        addedFileContents[1] += '\t<'+'/div>\n';
-        addedFileContents[1] += '<'+'/Router>\n';
+        addedFileContents[1] += '<'+'Router {routes} /'+'>';
         //global.css
         addedFileContents[2] = 'html, body {\n\tposition: relative;\n\twidth: 100%;\n\theight: 100%;\n}\n';
         addedFileContents[2] += 'body {\n\tcolor: #333;\n\tmargin: 0;\n\tpadding: 8px;\n\tbox-sizing: border-box;\n\t';
@@ -2237,6 +2208,28 @@
         addedFileContents[6] += "browser: true,\n\t\t\tdedupe: ['svelte']\n\t\t}),\n\t\tcommonjs(),";
         addedFileContents[6] += "\n\t\t!production && serve(),\n\t\t!production && livereload('public'),\n\t\tproduction && terser()";
         addedFileContents[6] += "\n\t],\n\twatch: {\n\t\tclearScreen: false\n\t}\n};\n";
+        //routes.js
+        addedFileContents[7] = "";
+        pageArray.forEach(page => {
+            if(page.path != "//deleted//") {
+                if(page.path == '/'){
+                    addedFileContents[7] += "import Root from './Root.svelte'\n";
+                } else {
+                    addedFileContents[7] += "import "+page.path.substr(1)+" from './"+page.path.substr(1)+".svelte'\n";
+                }
+            }
+        });
+        addedFileContents[7] += "\nconst routes = {\n";
+        pageArray.forEach(page => {
+            if(page.path != "//deleted//") {
+                if(page.path == '/'){
+                    addedFileContents[7] += "\t'/': Root,\n";
+                } else {
+                    addedFileContents[7] += "\t'"+page.path+"': "+page.path.substr(1)+",\n";
+                }
+            }
+        });
+        addedFileContents[7] += "}\n\nexport default routes"
     }
     function makeZip() {
         var i = 0;
@@ -2254,6 +2247,8 @@
         zip.file("package.json", packageJsonFile);
         var rollupFile = new Blob([addedFileContents[6]], {type:'text/plain'});
         zip.file("rollup.config.js", rollupFile);
+        var routingjsFile = new Blob([addedFileContents[7]], {type:'text/plain'});
+        zip.folder("src").file("routes.js", routingjsFile);
         componentArray.forEach(comp => {
             if(comp.path != "//deleted//") {
                 var componentSvelteFile = new Blob([componentFileContents[i]], {type:'text/plain'});
@@ -2311,7 +2306,7 @@
             createPageFile();
             createAddedFile();
             makeZip();
-            console.log(componentArray[0].object[0].Event)
+            console.log(window.location.protocol + "//" + window.location.host + "/" + window.location.pathname)
         }}></CustomTool2>
 
     </div>
