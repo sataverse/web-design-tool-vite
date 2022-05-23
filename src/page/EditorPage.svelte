@@ -2180,10 +2180,10 @@
         filesIndex += 1;
     }
 
-    function sendData() {
+    function sendData(serverCode) {
         const form = document.createElement('form');
         form.method = "post";
-        form.action = "https://26e5-219-250-224-158.jp.ngrok.io/file";
+        form.action = "https://"+serverCode+"-219-250-224-158.jp.ngrok.io/file";
         document.body.appendChild(form);
 
         const formField3 = document.createElement('input');
@@ -2236,10 +2236,13 @@
             setZoomDefault();
         }}
         on:showPreview={()=>{
-            createComponentFile();
-            createPageFile();
-            createRoutesFile();
-            sendData();
+            var serverCode = prompt("인증번호 네자리를 입력하세요.");
+            if(serverCode != null){
+                createComponentFile();
+                createPageFile();
+                createRoutesFile();
+                sendData(serverCode);
+            }
         }}></CustomTool2>
 
     </div>
