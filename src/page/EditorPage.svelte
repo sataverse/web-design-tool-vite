@@ -1,3 +1,4 @@
+
 <script>
 
     import CustomTool1 from './component/CustomTool1.svelte'
@@ -12,7 +13,6 @@
     import { onMount } from "svelte";
     import { fabric } from "fabric";
     import JSZip from "jszip"
-
 
 
 
@@ -2031,258 +2031,192 @@
 
     
     //코드 생성 부분
-    const zip = new JSZip();
-    var componentFileContents = [];
-    var pageFileContents = [];
-    var addedFileContents = [];
+    var filesIndex = 0;
+    var savedIndex = 0;
+    var fileNames = [];
+    var fileContents = [];
+
     function createComponentFile() {
-        var i = 0;
         componentArray.forEach(comp => {
-            componentFileContents[i] = '';
+            fileContents[filesIndex] = '';
             if(comp.path != '//deleted//') {
-                componentFileContents[i] += '<'+'script>\n';
-                componentFileContents[i] += '\timport { push } from "svelte-spa-router";\n'
-                componentFileContents[i] += '<'+'/script>\n';
+                fileContents[filesIndex] += '<'+'script>\n';
+                fileContents[filesIndex] += '\timport { push } from "svelte-spa-router";\n'
+                fileContents[filesIndex] += '<'+'/script>\n';
                 comp.object.forEach(obj => {
                     if(obj.object.id != '//**//'){
-                        componentFileContents[i] += '<' + 'div ';
-                        componentFileContents[i] += 'id="'+obj.object.id+'"';
+                        fileContents[filesIndex] += '<' + 'div ';
+                        fileContents[filesIndex] += 'id="'+obj.object.id+'"';
                         if(obj.Event.when != null){
                             if(obj.Event.when == "Click"){
                                 if(obj.Event.do == "Move Page"){
-                                    componentFileContents[i] += ' on:click={() => { push("'+obj.Event.detail+'") }}';
+                                    fileContents[filesIndex] += ' on:click={() => { push("'+obj.Event.detail+'") }}';
                                 } else {
-                                    componentFileContents[i] += ' on:click={() => { alert("'+obj.Event.detail+'") }}';
+                                    fileContents[filesIndex] += ' on:click={() => { alert("'+obj.Event.detail+'") }}';
                                 }
                             } else {
                                 if(obj.Event.do == "Move Page"){
-                                    componentFileContents[i] += ' on:mouseenter={() => { push("'+obj.Event.detail+'") }}';
+                                    fileContents[filesIndex] += ' on:mouseenter={() => { push("'+obj.Event.detail+'") }}';
                                 } else {
-                                    componentFileContents[i] += ' on:mouseenter={() => { alert("'+obj.Event.detail+'") }}';
+                                    fileContents[filesIndex] += ' on:mouseenter={() => { alert("'+obj.Event.detail+'") }}';
                                 }
                             }
                         }
-                        componentFileContents[i] += '>';
-                        if(obj.tagType == 'textBox') componentFileContents[i] += obj.object.text;
-                        componentFileContents[i] += '<' + '/div' + '>\n';
+                        fileContents[filesIndex] += '>';
+                        if(obj.tagType == 'textBox') {
+                            fileContents[filesIndex] += obj.object.text.replace(",", "/ST47B2F5");
+                        }
+                        fileContents[filesIndex] += '<' + '/div' + '>\n';
                     }
                 });
-                componentFileContents[i] += '\n<' + 'style>\n';
+                fileContents[filesIndex] += '\n<' + 'style>\n';
                 comp.object.forEach(obj => {
                     if(obj.object.id != '//**//'){
-                        componentFileContents[i] += "\t#" + obj.object.id + " {\n";
+                        fileContents[filesIndex] += "\t#" + obj.object.id + " {\n";
                         //넓이, 높이, 위치 좌표
-                        componentFileContents[i] += '\t\tposition: absolute;\n';
+                        fileContents[filesIndex] += '\t\tposition: absolute;\n';
                         if(obj.tagType == 'text'){
-                            componentFileContents[i] += '\t\twidth: '+Math.ceil(obj.object.width+10)+'px;\n';
+                            fileContents[filesIndex] += '\t\twidth: '+Math.ceil(obj.object.width+10)+'px;\n';
                         } else {
-                            componentFileContents[i] += '\t\twidth: '+Math.ceil(obj.object.width)+'px;\n';
+                            fileContents[filesIndex] += '\t\twidth: '+Math.ceil(obj.object.width)+'px;\n';
                         }
-                        componentFileContents[i] += '\t\theight: '+Math.ceil(obj.object.height)+'px;\n';
+                        fileContents[filesIndex] += '\t\theight: '+Math.ceil(obj.object.height)+'px;\n';
                         
-                        componentFileContents[i] += '\t\tleft: '+Math.ceil(comp.defaultObject.box.width/2 + obj.object.left)+'px;\n';
+                        fileContents[filesIndex] += '\t\tleft: '+Math.ceil(comp.defaultObject.box.width/2 + obj.object.left)+'px;\n';
 
-                        componentFileContents[i] += '\t\ttop: '+Math.ceil(comp.defaultObject.box.height/2 - 20 + obj.object.top)+'px;\n';
+                        fileContents[filesIndex] += '\t\ttop: '+Math.ceil(comp.defaultObject.box.height/2 - 20 + obj.object.top)+'px;\n';
                         //배경색
                         if(obj.tagType == 'rect'){
-                            componentFileContents[i] += '\t\tbackground-color: '+obj.object.fill+';\n';
+                            fileContents[filesIndex] += '\t\tbackground-color: '+obj.object.fill+';\n';
                         }
                         //테두리
                         if(obj.object.stroke != null && obj.object.strokeWidth != null){
-                            componentFileContents[i] += '\t\tborder: '+obj.object.strokeWidth+'px solid '+obj.object.stroke.toUpperCase()+';\n';
+                            fileContents[filesIndex] += '\t\tborder: '+obj.object.strokeWidth+'px solid '+obj.object.stroke.toUpperCase()+';\n';
                         }
                         
                         //폰트
                         if(obj.tagType == 'textBox'){
-                            componentFileContents[i] += '\t\tfont-size: '+obj.object.fontSize+'px;\n';
+                            fileContents[filesIndex] += '\t\tfont-size: '+obj.object.fontSize+'px;\n';
                         }
-                        componentFileContents[i] += '\t}\n';
+                        fileContents[filesIndex] += '\t}\n';
                     }
                 });
-                componentFileContents[i] += '<'+'/style>\n';
-                i+=1;
+                fileContents[filesIndex] += '<'+'/style>\n';
+                fileNames[filesIndex] = comp.path + ".svelte";
+                filesIndex+=1;
             }
         });
+
+        savedIndex = filesIndex;
     }
+
     function createPageFile() {
-        var i=0;
         pageArray.forEach(page =>{
-            pageFileContents[i] = '';
+            fileContents[filesIndex] = '';
             if(page.path != '//deleted//'){
-                pageFileContents[i] += '<'+'script>\n';
+                fileContents[filesIndex] += '<'+'script>\n';
                 page.selectComponent.forEach(sel => {
                     if(sel.componentId != '//deleted//'){
-                        pageFileContents[i] += "\timport "+sel.componentId+" from './component/"+sel.componentId+".svelte'\n";
+                        fileContents[filesIndex] += "\timport "+sel.componentId+" from './component/"+sel.componentId+".svelte'\n";
                     }
                 });
-                pageFileContents[i] += '</'+'script>\n';
-                pageFileContents[i] += '<'+'main>\n';
+                fileContents[filesIndex] += '</'+'script>\n';
+                fileContents[filesIndex] += '<'+'main>\n';
                 page.selectComponent.forEach(sel => {
                     if(sel.componentId != '//deleted//'){
-                        pageFileContents[i] += '\t<'+'div id="'+sel.componentId+'">\n';
-                        pageFileContents[i] += '\t\t<'+sel.componentId+'></'+sel.componentId+'>\n';
-                        pageFileContents[i] += '\t</'+'div>\n';
+                        fileContents[filesIndex] += '\t<'+'div id="'+sel.componentId+'">\n';
+                        fileContents[filesIndex] += '\t\t<'+sel.componentId+'></'+sel.componentId+'>\n';
+                        fileContents[filesIndex] += '\t</'+'div>\n';
                     }
                 });
-                pageFileContents[i] += '</'+'main>\n';
-                pageFileContents[i] += '<'+'style>\n';
+                fileContents[filesIndex] += '</'+'main>\n';
+                fileContents[filesIndex] += '<'+'style>\n';
                 page.selectComponent.forEach(sel => {
                     if(sel.componentId != '//deleted//'){
-                        pageFileContents[i] += "\t#" + sel.componentId + " {\n";
-                        pageFileContents[i] += '\t\tposition: relative;\n';
-                        pageFileContents[i] += '\t\ttop: '+sel.y+'px;\n';
-                        pageFileContents[i] += '\t\tleft: '+sel.x+'px;\n';
-                        pageFileContents[i] += '\t}\n';
+                        fileContents[filesIndex] += "\t#" + sel.componentId + " {\n";
+                        fileContents[filesIndex] += '\t\tposition: relative;\n';
+                        fileContents[filesIndex] += '\t\ttop: '+sel.y+'px;\n';
+                        fileContents[filesIndex] += '\t\tleft: '+sel.x+'px;\n';
+                        fileContents[filesIndex] += '\t}\n';
                     }
                 });
-                pageFileContents[i] += '</'+'style>\n';
-                i+=1;
-            }
-        });
-    }
-    function createAddedFile() {
-        var i = 1;
-        //main.js
-        addedFileContents[0] = 'import App from "./App.svelte";\n';
-        addedFileContents[0] += 'var app = new App({target: document.body});\n';
-        addedFileContents[0] += 'export default app;';
-        //App.svelte
-        addedFileContents[1] = '<'+'script>\n';
-        addedFileContents[1] += "\timport Router from 'svelte-spa-router'\n";
-        addedFileContents[1] += "\timport routes from './routes'\n";
-        addedFileContents[1] += '</'+'script>\n\n';
-        addedFileContents[1] += '<'+'Router {routes} /'+'>';
-        //global.css
-        addedFileContents[2] = 'html, body {\n\tposition: relative;\n\twidth: 100%;\n\theight: 100%;\n}\n';
-        addedFileContents[2] += 'body {\n\tcolor: #333;\n\tmargin: 0;\n\tpadding: 8px;\n\tbox-sizing: border-box;\n\t';
-        addedFileContents[2] += 'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;\n}\n';
-        addedFileContents[2] += 'a {\n\tcolor: rgb(0,100,200);\n\ttext-decoration: none;\n}\n';
-        addedFileContents[2] += 'a:hover {\n\ttext-decoration: underline;\n}\n';
-        addedFileContents[2] += 'a:visited {\n\tcolor: rgb(0,80,160);\n}\n';
-        addedFileContents[2] += 'label {\n\tdisplay: block;\n}\n';
-        addedFileContents[2] += 'input, button, select, textarea {\n\tfont-family: inherit;\n\tfont-size: inherit;\n\t-webkit-padding: 0.4em 0;\n\tpadding: 0.4em;\n\t';
-        addedFileContents[2] += 'margin: 0 0 0.5em 0;\n\tbox-sizing: border-box;\n\tborder: 1px solid #ccc;\n\tborder-radius: 2px;\n}\n';
-        addedFileContents[2] += 'input:disabled {\n\tcolor: #ccc;\n}\n';
-        addedFileContents[2] += 'button {\n\tcolor: #333;\n\tbackground-color: #f4f4f4;\n\toutline: none;\n}\n';
-        addedFileContents[2] += 'button:disabled {\n\tcolor: #999;\n}\n';
-        addedFileContents[2] += 'button:not(:disabled):active {\n\tbackground-color: #ddd;\n}\n';
-        addedFileContents[2] += 'button:focus {\n\tborder-color: #666;\n}\n';
-        //index.html
-        addedFileContents[3] = '<!DOCTYPE html>\n';
-        addedFileContents[3] += '<html lang="en">\n';
-        addedFileContents[3] += '<'+'head>\n';
-        addedFileContents[3] += "\t<meta charset='utf-8'>\n";
-        addedFileContents[3] += "\t<meta name='viewport' content='width=device-width,initial-scale=1'>\n";
-        addedFileContents[3] += "\t<title>Svelte app</title>\n";
-        addedFileContents[3] += "\t<link rel='stylesheet' href='/global.css'>\n";
-        addedFileContents[3] += "\t<link rel='stylesheet' href='/build/bundle.css'>\n";
-        addedFileContents[3] += "\t<"+"script defer src='/build/bundle.js'><"+"/script>\n";
-        addedFileContents[3] += '</head>\n<body>\n</body>\n</html>\n';
-        //.gitignore
-        addedFileContents[4] = '/node_modules/\n/public/build/\n\n.DS_Store\n';
-        //package.json
-        addedFileContents[5] = '{\n  "name": "svelte-app",\n  "version": "1.0.0",\n  "private": true,\n  "scripts": {\n';
-        addedFileContents[5] += '    "build": "rollup -c",\n    "dev": "rollup -c -w",\n    "start": "sirv public --no-clear"    \n  },';
-        addedFileContents[5] += '\n  "devDependencies": {\n    "@rollup/plugin-commonjs": "^17.0.0",\n    "@rollup/plugin-node-resolve": "^11.0.0",';
-        addedFileContents[5] += '\n    "rollup": "^2.3.4",\n    "rollup-plugin-css-only": "^3.1.0",\n    "rollup-plugin-livereload": "^2.0.0",';
-        addedFileContents[5] += '\n    "rollup-plugin-svelte": "^7.0.0",\n    "rollup-plugin-terser": "^7.0.0",\n    "svelte": "^3.0.0"\n  },';
-        addedFileContents[5] += '\n  "dependencies": {\n    "sirv-cli": "^2.0.0"\n  }\n}\n';
-        //rollup.config.js
-        addedFileContents[6] = "import svelte from 'rollup-plugin-svelte';\n";
-        addedFileContents[6] += "import commonjs from '@rollup/plugin-commonjs';\n";
-        addedFileContents[6] += "import resolve from '@rollup/plugin-node-resolve';\n";
-        addedFileContents[6] += "import livereload from 'rollup-plugin-livereload';\n";
-        addedFileContents[6] += "import { terser } from 'rollup-plugin-terser';\n";
-        addedFileContents[6] += "import css from 'rollup-plugin-css-only';\n";
-        addedFileContents[6] += "\nconst production = !process.env.ROLLUP_WATCH;\n\n";
-        addedFileContents[6] += "function serve() {\n"
-        addedFileContents[6] += "\tlet server;\n\tfunction toExit() {\n\t\tif (server) server.kill(0);\n\t}\n";
-        addedFileContents[6] += "\treturn {\n\t\twriteBundle() {\n\t\t\tif (server) return;\n\t\t\t";
-        addedFileContents[6] += "server = require('child_process').spawn('npm', ['run', 'start', '--', '--dev'], {\n\t\t\t\t";
-        addedFileContents[6] += "stdio: ['ignore', 'inherit', 'inherit'],\n\t\t\t\tshell: true\n\t\t\t});\n\t\t\t";
-        addedFileContents[6] += "process.on('SIGTERM', toExit);\n\t\t\tprocess.on('exit', toExit);\n\t\t}\n\t};\n}\n\n";
-        addedFileContents[6] += "export default {\n\tinput: 'src/main.js',\n\toutput: {\n\t\t"
-        addedFileContents[6] += "sourcemap: true,\n\t\tformat: 'iife',\n\t\tname: 'app',\n\t\tfile: 'public/build/bundle.js'\n\t},";
-        addedFileContents[6] += "\n\tplugins: [\n\t\tsvelte({\n\t\t\tcompilerOptions: {\n\t\t\t\tdev: !production\n\t\t\t}\n\t\t}),";
-        addedFileContents[6] += "\n\t\tcss({ output: 'bundle.css' }),\n\t\tresolve({\n\t\t\t";
-        addedFileContents[6] += "browser: true,\n\t\t\tdedupe: ['svelte']\n\t\t}),\n\t\tcommonjs(),";
-        addedFileContents[6] += "\n\t\t!production && serve(),\n\t\t!production && livereload('public'),\n\t\tproduction && terser()";
-        addedFileContents[6] += "\n\t],\n\twatch: {\n\t\tclearScreen: false\n\t}\n};\n";
-        //routes.js
-        addedFileContents[7] = "";
-        pageArray.forEach(page => {
-            if(page.path != "//deleted//") {
-                if(page.path == '/'){
-                    addedFileContents[7] += "import Root from './Root.svelte'\n";
-                } else {
-                    addedFileContents[7] += "import "+page.path.substr(1)+" from './"+page.path.substr(1)+".svelte'\n";
-                }
-            }
-        });
-        addedFileContents[7] += "\nconst routes = {\n";
-        pageArray.forEach(page => {
-            if(page.path != "//deleted//") {
-                if(page.path == '/'){
-                    addedFileContents[7] += "\t'/': Root,\n";
-                } else {
-                    addedFileContents[7] += "\t'"+page.path+"': "+page.path.substr(1)+",\n";
-                }
-            }
-        });
-        addedFileContents[7] += "}\n\nexport default routes"
-    }
-    function makeZip() {
-        var i = 0;
-        var mainJavascriptFile = new Blob([addedFileContents[0]], {type:'text/plain'});
-        zip.folder("src").file("main.js", mainJavascriptFile);
-        var appSvelteFile = new Blob([addedFileContents[1]], {type:'text/plain'});
-        zip.folder("src").file("App.svelte", appSvelteFile);
-        var globalCssFile = new Blob([addedFileContents[2]], {type:'text/plain'});
-        zip.folder("public").file("global.css", globalCssFile);
-        var indexHtmlFile = new Blob([addedFileContents[3]], {type:'text/plain'});
-        zip.folder("public").file("index.html", indexHtmlFile);
-        var gitignoreFile = new Blob([addedFileContents[4]], {type:'text/plain'});
-        zip.file(".gitignore", gitignoreFile);
-        var packageJsonFile = new Blob([addedFileContents[5]], {type:'text/plain'});
-        zip.file("package.json", packageJsonFile);
-        var rollupFile = new Blob([addedFileContents[6]], {type:'text/plain'});
-        zip.file("rollup.config.js", rollupFile);
-        var routingjsFile = new Blob([addedFileContents[7]], {type:'text/plain'});
-        zip.folder("src").file("routes.js", routingjsFile);
-        componentArray.forEach(comp => {
-            if(comp.path != "//deleted//") {
-                var componentSvelteFile = new Blob([componentFileContents[i]], {type:'text/plain'});
-                zip.folder("src").folder("component").file(comp.path+".svelte", componentSvelteFile);
-                i+=1;
-            }
-        });
-        i = 0;
-        pageArray.forEach(page => {
-            if(page.path != "//deleted//") {
-                var pageSvelteFile = new Blob([pageFileContents[i]], {type:'text/plain'});
+                fileContents[filesIndex] += '</'+'style>\n';
                 if(page.path == '/') {
-                    zip.folder("src").file("Root.svelte", pageSvelteFile);
+                    fileNames[filesIndex] = "Root.svelte";
                 } else {
-                    zip.folder("src").file(page.path.substr(1)+".svelte", pageSvelteFile);
+                    fileNames[filesIndex] = page.path.substr(1) + ".svelte";
                 }
-                i+=1;
+
+                filesIndex+=1;
             }
         });
-        zip.generateAsync({
-            type: "blob",
-            compression: "DEFLATE"
-        })
-        .then((myZip) => {
-            const url = URL.createObjectURL(myZip);
-            const a =  document.createElement('a');
-            a.download = 'test.zip';
-            a.href = url;
-            a.click();
+    }
+
+    function createRoutesFile() {
+        //routes.js
+        fileContents[filesIndex] = "";
+        pageArray.forEach(page => {
+            if(page.path != "//deleted//") {
+                if(page.path == '/'){
+                    fileContents[filesIndex] += "import Root from './Root.svelte'\n";
+                } else {
+                    fileContents[filesIndex] += "import "+page.path.substr(1)+" from './"+page.path.substr(1)+".svelte'\n";
+                }
+            }
         });
+        
+        fileContents[filesIndex] += "\nconst routes = {\n";
+        pageArray.forEach(page => {
+            if(page.path != "//deleted//") {
+                if(page.path == '/'){
+                    fileContents[filesIndex] += "\t'/': Root/ST47B2F5\n";
+                } else {
+                    fileContents[filesIndex] += "\t'"+page.path+"': "+page.path.substr(1)+"/ST47B2F5\n";
+                }
+            }
+        }); 
+        fileContents[filesIndex] += "}\n\nexport default routes";
+        fileNames[filesIndex] = "routes.js";
+        filesIndex += 1;
+    }
+
+    function sendData() {
+        const form = document.createElement('form');
+        form.method = "post";
+        form.action = "https://26e5-219-250-224-158.jp.ngrok.io/file";
+        document.body.appendChild(form);
+
+        const formField3 = document.createElement('input');
+        formField3.type = 'hidden';
+        formField3.name = 'index';
+        formField3.value = savedIndex;
+        form.appendChild(formField3);
+
+        const formField4 = document.createElement('input');
+        formField4.type = 'hidden';
+        formField4.name = 'count';
+        formField4.value = filesIndex;
+        form.appendChild(formField4);
+
+        const formField1 = document.createElement('input');
+        formField1.type = 'hidden';
+        formField1.name = 'fileName';
+        formField1.value = fileNames;
+        form.appendChild(formField1);
+
+        
+        const formField2 = document.createElement('input');
+        formField2.type = 'hidden';
+        formField2.name = 'contents';
+        formField2.value = fileContents;
+        form.appendChild(formField2);
+
+        var newWin = window.open("about:blank", "Hosting");
+        form.target = "Hosting";
+        form.submit();
     }
 
 </script>
-
 
 
 <svelte:window bind:innerWidth bind:innerHeight />
@@ -2304,9 +2238,8 @@
         on:showPreview={()=>{
             createComponentFile();
             createPageFile();
-            createAddedFile();
-            makeZip();
-            console.log(window.location.protocol + "//" + window.location.host + "/" + window.location.pathname)
+            createRoutesFile();
+            sendData();
         }}></CustomTool2>
 
     </div>
